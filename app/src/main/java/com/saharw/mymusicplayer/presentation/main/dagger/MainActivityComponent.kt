@@ -25,7 +25,7 @@ interface MainActivityComponent {
 
         @Provides
         fun provideMainView(): IView {
-            return MainView()
+            return MainView(activity, layoutId)
         }
 
         @Provides
@@ -35,7 +35,7 @@ interface MainActivityComponent {
 
         @Provides
         fun provideMainPresenter(view : IView, model: IModel): IPresenter {
-            return MainPresenter(activity, layoutId, view, model)
+            return MainPresenter(view, model)
         }
     }
 }

@@ -17,7 +17,7 @@ class MainActivity : BaseActivity() {
 
     override fun initActivity() {
         Log.d(TAG, "initActivity")
-        DaggerMainActivityComponent.builder().mainActivityModule(MainActivityComponent.MainActivityModule(this, R.id.main_fragment)).build().inject(this)
+        DaggerMainActivityComponent.builder().mainActivityModule(MainActivityComponent.MainActivityModule(this, R.layout.fragment_main)).build().inject(this)
         mPresenter.onPresenterCreate()
     }
 
