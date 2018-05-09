@@ -5,7 +5,7 @@
 
     <TextView
         android:id="@+id/txtV_header"
-        android:text="@string/frag_artists_test"
+        android:text="@string/frag_albums_test"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </android.support.constraint.ConstraintLayout>

@@ -1,14 +1,17 @@
-package com.saharw.mymusicplayer.presentation.artists.dagger
+package com.saharw.mymusicplayer.presentation.base.dagger
 
 import android.app.Activity
 import android.support.v4.app.Fragment
-import com.saharw.mymusicplayer.presentation.artists.ArtistsFragment
-import com.saharw.mymusicplayer.presentation.artists.mvp.ArtistsModel
-import com.saharw.mymusicplayer.presentation.artists.mvp.ArtistsPresenter
-import com.saharw.mymusicplayer.presentation.artists.mvp.ArtistsView
+import com.saharw.mymusicplayer.presentation.albums.FragmentAlbums
+import com.saharw.mymusicplayer.presentation.albums.mvp.AlbumsModel
+import com.saharw.mymusicplayer.presentation.albums.mvp.AlbumsPresenter
+import com.saharw.mymusicplayer.presentation.albums.mvp.AlbumsView
+import com.saharw.mymusicplayer.presentation.artists.FragmentArtists
+import com.saharw.mymusicplayer.presentation.artists.mvp.*
 import com.saharw.mymusicplayer.presentation.base.IModel
 import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.base.IView
+import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -19,7 +22,9 @@ import dagger.Provides
 @Component(modules = arrayOf(FragmentsComponent.FragmentsModule::class))
 interface FragmentsComponent {
 
-    fun inject(fragment: ArtistsFragment)
+    fun inject(fragmentArtists: FragmentArtists)
+    fun inject(fragmentAlbums: FragmentAlbums)
+    fun inject(fragmentPlaylists: FragmentPlaylists)
 
     @Module
     class FragmentsModule(private val frag: Fragment, private val activity: Activity){
@@ -28,8 +33,14 @@ interface FragmentsComponent {
         fun provideMainView(): IView {
             var res : IView
             when(frag){
-                is ArtistsFragment -> {
+                is FragmentArtists -> {
                     res = ArtistsView(frag)
+                }
+                is FragmentAlbums -> {
+                    res = AlbumsView(frag)
+                }
+                is FragmentPlaylists -> {
+                    res = PlaylistsView(frag)
                 }
                 else -> {
 
@@ -61,8 +72,14 @@ interface FragmentsComponent {
         fun provideMainModel(): IModel {
             var res : IModel
             when(frag){
-                is ArtistsFragment -> {
+                is FragmentArtists -> {
                     res = ArtistsModel()
+                }
+                is FragmentAlbums -> {
+                    res = AlbumsModel()
+                }
+                is FragmentPlaylists -> {
+                    res = PlaylistsModel()
                 }
                 else -> {
                     res = object : IModel {
@@ -84,8 +101,14 @@ interface FragmentsComponent {
         fun provideMainPresenter(view : IView, model: IModel): IPresenter {
             var res : IPresenter
             when(frag){
-                is ArtistsFragment -> {
+                is FragmentArtists -> {
                     res = ArtistsPresenter(view, model)
+                }
+                is FragmentAlbums -> {
+                    res = AlbumsPresenter(view, model)
+                }
+                is FragmentPlaylists -> {
+                    res = PlaylistsPresenter(view, model)
                 }
                 else -> {
                     res = object : IPresenter {

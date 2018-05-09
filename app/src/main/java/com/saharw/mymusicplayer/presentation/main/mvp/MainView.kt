@@ -8,24 +8,21 @@ import android.util.Log
 import android.view.View
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.adapters.MusicPlayerPagerAdapter
-import com.saharw.mymusicplayer.presentation.artists.ArtistsFragment
 import com.saharw.mymusicplayer.presentation.base.IView
 import java.lang.ref.WeakReference
 
 @SuppressLint("ValidFragment")
+
 /**
  * Created by saharw on 06/05/2018.
  */
-class MainView(private val activity: AppCompatActivity, private val layoutId: Int) : IView {
+class MainView(private val activity: AppCompatActivity, private val layoutId: Int, private var tabsFragArray : Array<Fragment>) : IView {
 
     private lateinit var mActivity : WeakReference<AppCompatActivity>
     private val TAG = "MainView"
 
     // UI Components (TODO: transpose to DataBinding usage)
     lateinit var mViewPager : ViewPager
-
-    // tabs fragments
-    var mTabsFragments = arrayOf<Fragment>(ArtistsFragment.newInstance("Artists"))
 
     override fun onViewCreate() {
         Log.d(TAG, "onViewCreate")
@@ -53,7 +50,7 @@ class MainView(private val activity: AppCompatActivity, private val layoutId: In
         Log.d(TAG, "initUIComponents")
         mViewPager = view.findViewById(R.id.pager)
         if(mViewPager != null) {
-            initAndSetAdapter(mViewPager, mTabsFragments)
+            initAndSetAdapter(mViewPager, tabsFragArray)
         }else {
             Log.e(TAG, "initUIComponents: view pager is null!")
         }

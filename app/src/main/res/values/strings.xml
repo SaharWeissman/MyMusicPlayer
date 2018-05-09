@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MyMusicPlayer</string>
+    <string name="fragment_artists_tab_header">Artists</string>
+    <string name="fragment_albums_tab_header">Albums</string>
+    <string name="frag_artists_test">Artists Test</string>
+    <string name="frag_albums_test">Albums Test</string>
+    <string name="tab_artists_title">Artists</string>
+    <string name="tab_albums_title">Albums</string>
 </resources>

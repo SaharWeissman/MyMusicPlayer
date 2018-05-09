@@ -4,15 +4,15 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.saharw.mymusicplayer.R
-import com.saharw.mymusicplayer.presentation.artists.FragmentArtists
 import com.saharw.mymusicplayer.presentation.base.IView
+import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
 
 /**
  * Created by saharw on 08/05/2018.
  */
-class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
+class PlaylistsView(private val fragmentPlaylists: FragmentPlaylists) : IView {
 
-    private val TAG = "ArtistsView"
+    private val TAG = "PlaylistsView"
 
     private lateinit var mTxtVHeader : TextView
 
@@ -22,8 +22,8 @@ class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
 
     override fun onViewResume() {
         Log.d(TAG, "onViewResume")
-        if(fragmentArtists.view != null) {
-            initUIComponents(fragmentArtists.view!!)
+        if(fragmentPlaylists.view != null) {
+            initUIComponents(fragmentPlaylists.view!!)
         }
     }
 

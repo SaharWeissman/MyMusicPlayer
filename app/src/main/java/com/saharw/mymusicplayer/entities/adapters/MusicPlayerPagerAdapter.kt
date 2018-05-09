@@ -9,7 +9,7 @@ import com.saharw.mymusicplayer.presentation.base.BaseFragment
  * Created by saharw on 08/05/2018.
  */
 class MusicPlayerPagerAdapter(private val fragments: Array<Fragment>,
-                              private val fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+                              fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
     override fun getItem(position: Int): Fragment {
         return fragments[position]
     }

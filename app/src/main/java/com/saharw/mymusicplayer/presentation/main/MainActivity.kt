@@ -2,10 +2,13 @@ package com.saharw.mymusicplayer.presentation.main
 
 import android.util.Log
 import com.saharw.mymusicplayer.R
+import com.saharw.mymusicplayer.presentation.albums.FragmentAlbums
+import com.saharw.mymusicplayer.presentation.artists.FragmentArtists
 import com.saharw.mymusicplayer.presentation.base.BaseActivity
 import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.main.dagger.DaggerMainActivityComponent
 import com.saharw.mymusicplayer.presentation.main.dagger.MainActivityComponent
+import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
 import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
@@ -17,7 +20,14 @@ class MainActivity : BaseActivity() {
 
     override fun initActivity() {
         Log.d(TAG, "initActivity")
-        DaggerMainActivityComponent.builder().mainActivityModule(MainActivityComponent.MainActivityModule(this, R.layout.fragment_main)).build().inject(this)
+        DaggerMainActivityComponent.builder().mainActivityModule(
+                MainActivityComponent.MainActivityModule(this, R.layout.fragment_main,
+                        arrayOf(
+                                FragmentArtists.newInstance(),
+                                FragmentAlbums.newInstance(),
+                                FragmentPlaylists.newInstance()
+                        )))
+                .build().inject(this)
         mPresenter.onPresenterCreate()
     }
 

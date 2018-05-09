@@ -1,5 +1,6 @@
 package com.saharw.mymusicplayer.presentation.main.dagger
 
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import com.saharw.mymusicplayer.presentation.base.IModel
 import com.saharw.mymusicplayer.presentation.base.IPresenter
@@ -21,11 +22,11 @@ interface MainActivityComponent {
     fun inject(activity: MainActivity)
 
     @Module
-    class MainActivityModule(private val activity: AppCompatActivity, private val layoutId: Int){
+    class MainActivityModule(private val activity: AppCompatActivity, private val layoutId: Int, private val tabsFragArray : Array<Fragment>){
 
         @Provides
         fun provideMainView(): IView {
-            return MainView(activity, layoutId)
+            return MainView(activity, layoutId, tabsFragArray)
         }
 
         @Provides

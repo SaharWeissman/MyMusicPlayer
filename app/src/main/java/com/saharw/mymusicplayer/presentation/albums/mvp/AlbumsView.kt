@@ -1,18 +1,18 @@
-package com.saharw.mymusicplayer.presentation.artists.mvp
+package com.saharw.mymusicplayer.presentation.albums.mvp
 
+import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.saharw.mymusicplayer.R
-import com.saharw.mymusicplayer.presentation.artists.FragmentArtists
 import com.saharw.mymusicplayer.presentation.base.IView
 
 /**
- * Created by saharw on 08/05/2018.
+ * Created by saharw on 09/05/2018.
  */
-class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
+class AlbumsView(private val fragmentAlbums: Fragment) : IView {
 
-    private val TAG = "ArtistsView"
+    private val TAG = "AlbumsView"
 
     private lateinit var mTxtVHeader : TextView
 
@@ -22,8 +22,8 @@ class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
 
     override fun onViewResume() {
         Log.d(TAG, "onViewResume")
-        if(fragmentArtists.view != null) {
-            initUIComponents(fragmentArtists.view!!)
+        if(fragmentAlbums.view != null) {
+            initUIComponents(fragmentAlbums.view!!)
         }
     }
 
