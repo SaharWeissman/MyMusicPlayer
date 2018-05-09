@@ -3,9 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/txtV_header"
-        android:text="@string/frag_artists_test"
+    <GridView
+        android:id="@+id/gridV_artists"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:columnWidth="120dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="4dp"
+        android:horizontalSpacing="4dp"/>
 </android.support.constraint.ConstraintLayout>

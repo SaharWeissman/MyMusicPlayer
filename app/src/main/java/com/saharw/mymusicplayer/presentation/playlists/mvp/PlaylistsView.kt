@@ -1,9 +1,8 @@
 package com.saharw.mymusicplayer.presentation.artists.mvp
 
+import android.content.Context
 import android.util.Log
 import android.view.View
-import android.widget.TextView
-import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.presentation.base.IView
 import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
 
@@ -13,8 +12,6 @@ import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
 class PlaylistsView(private val fragmentPlaylists: FragmentPlaylists) : IView {
 
     private val TAG = "PlaylistsView"
-
-    private lateinit var mTxtVHeader : TextView
 
     override fun onViewCreate() {
         Log.d(TAG, "onViewCreate")
@@ -37,7 +34,9 @@ class PlaylistsView(private val fragmentPlaylists: FragmentPlaylists) : IView {
 
     private fun initUIComponents(view: View) {
         Log.d(TAG, "initUIComponents")
-        mTxtVHeader = view.findViewById(R.id.txtV_header)
-        mTxtVHeader.text = "Hello from $TAG"
+    }
+
+    override fun getContext(): Context {
+        return fragmentPlaylists.context
     }
 }

@@ -1,6 +1,7 @@
 package com.saharw.mymusicplayer.presentation.main.mvp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
@@ -60,5 +61,9 @@ class MainView(private val activity: AppCompatActivity, private val layoutId: In
         Log.d(TAG, "initAndSetAdapter")
         var adapter = MusicPlayerPagerAdapter(fragmentsArray, activity.supportFragmentManager)
         viewPager.adapter = adapter
+    }
+
+    override fun getContext(): Context {
+        return activity
     }
 }

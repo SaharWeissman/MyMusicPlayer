@@ -1,10 +1,9 @@
 package com.saharw.mymusicplayer.presentation.albums.mvp
 
+import android.content.Context
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.View
-import android.widget.TextView
-import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.presentation.base.IView
 
 /**
@@ -13,8 +12,6 @@ import com.saharw.mymusicplayer.presentation.base.IView
 class AlbumsView(private val fragmentAlbums: Fragment) : IView {
 
     private val TAG = "AlbumsView"
-
-    private lateinit var mTxtVHeader : TextView
 
     override fun onViewCreate() {
         Log.d(TAG, "onViewCreate")
@@ -37,7 +34,9 @@ class AlbumsView(private val fragmentAlbums: Fragment) : IView {
 
     private fun initUIComponents(view: View) {
         Log.d(TAG, "initUIComponents")
-        mTxtVHeader = view.findViewById(R.id.txtV_header)
-        mTxtVHeader.text = "Hello from $TAG"
     }
+    override fun getContext(): Context {
+        return fragmentAlbums.context
+    }
+
 }

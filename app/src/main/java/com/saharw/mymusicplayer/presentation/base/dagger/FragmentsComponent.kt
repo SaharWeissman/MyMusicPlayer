@@ -1,6 +1,7 @@
 package com.saharw.mymusicplayer.presentation.base.dagger
 
 import android.app.Activity
+import android.content.Context
 import android.support.v4.app.Fragment
 import com.saharw.mymusicplayer.presentation.albums.FragmentAlbums
 import com.saharw.mymusicplayer.presentation.albums.mvp.AlbumsModel
@@ -46,6 +47,10 @@ interface FragmentsComponent {
 
                     // dummy
                     res = object : IView {
+                        override fun getContext(): Context {
+                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        }
+
                         override fun onViewCreate() {
                             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         }

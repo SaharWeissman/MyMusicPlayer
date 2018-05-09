@@ -1,5 +1,7 @@
 package com.saharw.mymusicplayer.presentation.main
 
+import android.Manifest
+import android.os.Build
 import android.util.Log
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.presentation.albums.FragmentAlbums
@@ -9,6 +11,7 @@ import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.main.dagger.DaggerMainActivityComponent
 import com.saharw.mymusicplayer.presentation.main.dagger.MainActivityComponent
 import com.saharw.mymusicplayer.presentation.playlists.FragmentPlaylists
+import com.tbruyelle.rxpermissions2.RxPermissions
 import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
@@ -28,7 +31,25 @@ class MainActivity : BaseActivity() {
                                 FragmentPlaylists.newInstance()
                         )))
                 .build().inject(this)
-        mPresenter.onPresenterCreate()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            Log.d(TAG, "initActivity: running on device with SDK_INT > ${Build.VERSION_CODES.M} (${Build.VERSION.SDK_INT}), requesting runtime permissions...")
+            var rxPermissions = RxPermissions(this)
+            rxPermissions
+                    .request(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .subscribe { granted ->
+                        if (granted) {
+                            Log.d(TAG, "permission granted")
+                            mPresenter.onPresenterCreate()
+                        } else {
+                            Log.e(TAG, "permission NOT granted!")
+                        }
+                    }
+        }
+    }
+
+    override fun onStart() {
+        Log.d(TAG, "onStart")
+        super.onStart()
     }
 
     override fun onResume() {

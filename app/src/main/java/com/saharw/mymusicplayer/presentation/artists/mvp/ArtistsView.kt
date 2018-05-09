@@ -1,9 +1,12 @@
 package com.saharw.mymusicplayer.presentation.artists.mvp
 
+import android.content.Context
 import android.util.Log
 import android.view.View
-import android.widget.TextView
+import android.widget.GridView
 import com.saharw.mymusicplayer.R
+import com.saharw.mymusicplayer.entities.adapters.ArtistsAdapter
+import com.saharw.mymusicplayer.entities.data.ArtistsItem
 import com.saharw.mymusicplayer.presentation.artists.FragmentArtists
 import com.saharw.mymusicplayer.presentation.base.IView
 
@@ -14,7 +17,8 @@ class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
 
     private val TAG = "ArtistsView"
 
-    private lateinit var mTxtVHeader : TextView
+    private lateinit var mArtistsView: GridView
+    private lateinit var mArtistsAdapter : ArtistsAdapter
 
     override fun onViewCreate() {
         Log.d(TAG, "onViewCreate")
@@ -37,7 +41,16 @@ class ArtistsView(private val fragmentArtists: FragmentArtists) : IView {
 
     private fun initUIComponents(view: View) {
         Log.d(TAG, "initUIComponents")
-        mTxtVHeader = view.findViewById(R.id.txtV_header)
-        mTxtVHeader.text = "Hello from $TAG"
+        mArtistsView = view.findViewById(R.id.gridV_artists)
+    }
+
+    fun displayArtistsData(artistsItems: List<ArtistsItem>, itemLayoutId : Int, itemOnClickListener: View.OnClickListener) {
+        mArtistsAdapter = ArtistsAdapter(fragmentArtists.activity, artistsItems, itemLayoutId, itemOnClickListener)
+        mArtistsView.adapter = mArtistsAdapter
+        mArtistsAdapter.notifyDataSetChanged() // redundant?
+    }
+
+    override fun getContext(): Context {
+        return fragmentArtists.context
     }
 }
