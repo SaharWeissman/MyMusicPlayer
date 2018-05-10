@@ -32,7 +32,7 @@ class ArtistsPresenter(private val view: IView,
         Log.d(TAG, "onPresenterResume")
         view.onViewResume()
 
-        // register for artists data
+        // register for artists dataPath
         (model as ArtistsModel).artistsData.observeOn(AndroidSchedulers.mainThread()).subscribe { onArtistsDataReady(it) }
         model.getArtistsData(view.getContext().contentResolver)
     }
@@ -48,11 +48,11 @@ class ArtistsPresenter(private val view: IView,
     }
 
     private fun onArtistsDataReady(data: Collection<ArtistsItem>?) {
-        Log.d(TAG, "onArtistsDataReady: data = $data")
+        Log.d(TAG, "onArtistsDataReady: dataPath = $data")
         if(data != null){
             (view as ArtistsView).displayArtistsData(data as List<ArtistsItem>, R.layout.artist_item, this)
         }else {
-            Log.e(TAG, "onArtistsDataReady: no data exists!")
+            Log.e(TAG, "onArtistsDataReady: no dataPath exists!")
         }
     }
 

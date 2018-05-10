@@ -33,7 +33,7 @@ class FilesActivity : BaseActivity() {
         }else {
             Log.e(TAG, "initActivity: no items exist!")
         }
-        DaggerFilesActivityComponent.builder().filesActivityModule(FilesActivityModule(this, R.layout.fragment_files, mediaItems)).build().inject(this)
+        DaggerFilesActivityComponent.builder().filesActivityModule(FilesActivityModule(this, R.layout.fragment_files, R.layout.file_item, mediaItems)).build().inject(this)
         mPresenter.onPresenterCreate()
     }
 

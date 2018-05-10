@@ -27,7 +27,7 @@ class ArtistsModel : IModel {
 
     fun getArtistsData(contentResolver: ContentResolver) {
 
-        // register for artists data ready
+        // register for artists dataPath ready
         MusicDataProvider.artistsDataSubject.observeOn(AndroidSchedulers.mainThread()).subscribe { artistsData.onNext(it) }
         MusicDataProvider.getAlbumsData(contentResolver)
     }

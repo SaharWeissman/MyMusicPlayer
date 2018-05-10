@@ -16,12 +16,15 @@ import javax.inject.Singleton
  * Created by saharw on 10/05/2018.
  */
 @Module
-class FilesActivityModule(private val activity: AppCompatActivity, private val layoutId: Int, private val mediaItems : Collection<MediaItem>?){
+class FilesActivityModule(private val activity: AppCompatActivity,
+                          private val mainLayoutId: Int,
+                          private val itemLayoutId: Int,
+                          private val mediaItems : Collection<MediaItem>?){
 
     @Provides
     @Singleton
     fun provideView(): IView{
-        return FilesView(activity, layoutId, mediaItems)
+        return FilesView(activity, mainLayoutId, itemLayoutId, mediaItems)
     }
 
     @Provides

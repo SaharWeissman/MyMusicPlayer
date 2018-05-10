@@ -27,7 +27,7 @@ open class MediaItem(
         val _id : Long,
         val artistId : Long,
         val artist : String,
-        val data: String,
+        val dataPath: String,
         val name: String,
         val type: ItemType,
         val duration: Long,
