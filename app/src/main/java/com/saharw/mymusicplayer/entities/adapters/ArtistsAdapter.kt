@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.data.ArtistsItem
+import com.saharw.mymusicplayer.entities.data.base.MediaItem
 
 /**
  * Created by saharw on 09/05/2018.
@@ -50,11 +51,13 @@ class ArtistsAdapter(private val ctxt: Context, private val data: List<ArtistsIt
 
         viewHolder.mIcon.setImageResource(R.drawable.ic_folder)
         viewHolder.mName.text = data[position].name
+        viewHolder.mMediaItems = data[position].items
         return convertView
     }
 
     class ViewHolder {
         lateinit var mIcon : ImageView
         lateinit var mName : TextView
+        lateinit var mMediaItems : Collection<MediaItem>
     }
 }

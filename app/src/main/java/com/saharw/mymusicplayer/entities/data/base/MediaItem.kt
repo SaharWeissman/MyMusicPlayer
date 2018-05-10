@@ -1,10 +1,9 @@
 package com.saharw.mymusicplayer.entities.data.base
 
 import android.database.Cursor
-import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import java.io.File
+import java.io.Serializable
 
 /**
  * Created by saharw on 09/05/2018.
@@ -28,11 +27,11 @@ open class MediaItem(
         val _id : Long,
         val artistId : Long,
         val artist : String,
-        val data: Uri,
+        val data: String,
         val name: String,
         val type: ItemType,
         val duration: Long,
-        val sizeBytes : Long) {
+        val sizeBytes : Long) : Serializable {
 
     companion object {
         val TAG = "MediaItem"
@@ -42,7 +41,7 @@ open class MediaItem(
                 var id = cursor.getLong(cursor.getColumnIndex(COLUMN_ARTIST_ID))
                 var artistId = cursor.getLong(cursor.getColumnIndex(COLUMN_ARTIST_ID))
                 var artist = cursor.getString(cursor.getColumnIndex(COLUMN_ARTIST))
-                var data = Uri.fromFile(File(cursor.getString(cursor.getColumnIndex(COLUMN_DATA))))
+                var data = cursor.getString(cursor.getColumnIndex(COLUMN_DATA))
                 var name = cursor.getString(cursor.getColumnIndex(COLUMN_TITLE))
                 var type = if(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_MUSIC)) == VALUE_IS_MUSIC)  ItemType.FileMusic else ItemType.Unknown
                 var duration = cursor.getLong(cursor.getColumnIndex(COLUMN_DURATION))

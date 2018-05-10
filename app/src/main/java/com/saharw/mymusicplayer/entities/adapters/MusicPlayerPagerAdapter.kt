@@ -3,7 +3,7 @@ package com.saharw.mymusicplayer.entities.adapters
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import com.saharw.mymusicplayer.presentation.base.BaseFragment
+import com.saharw.mymusicplayer.presentation.fragments.base.BaseFragment
 
 /**
  * Created by saharw on 08/05/2018.
