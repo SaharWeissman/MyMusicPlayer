@@ -6,4 +6,8 @@
     <string name="frag_albums_test">Albums Test</string>
     <string name="tab_artists_title">Artists</string>
     <string name="tab_albums_title">Albums</string>
+    <string name="notification_channel_name">MyMusicPlayer notification channel name</string>
+    <string name="notification_channel_description">MyMusicPlayer notification channel description</string>
+    <string name="notification_title">My music player</string>
+    <string name="notification_content">Is playing</string>
 </resources>

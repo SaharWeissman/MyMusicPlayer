@@ -27,7 +27,7 @@
             android:id="@+id/imgV_item_icon"
             android:layout_alignParentRight="true"
             android:paddingRight="4dp"
-            android:src="@drawable/icons_music_file"
+            android:src="@drawable/ic_music_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RelativeLayout>

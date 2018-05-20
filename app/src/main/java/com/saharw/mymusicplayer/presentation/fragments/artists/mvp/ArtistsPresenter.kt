@@ -64,14 +64,14 @@ class ArtistsPresenter(private val view: IView,
         var mediaItems = viewHolder.mMediaItems
         if(mediaItems != null && mediaItems.isNotEmpty()){
             Log.d(TAG, "onClick: artist \"${viewHolder.mName}\" has ${mediaItems.size} media items, sending to files fragment")
-            onMoveToFilesFragment(mediaItems)
+            onMoveToFilesActivity(mediaItems)
         }else {
             Log.e(TAG, "onClick: no media items exist for artist \"${viewHolder.mName}\"")
         }
     }
 
-    private fun onMoveToFilesFragment(mediaItems: Collection<MediaItem>) {
-        Log.d(TAG, "onMoveToFilesFragment")
+    private fun onMoveToFilesActivity(mediaItems: Collection<MediaItem>) {
+        Log.d(TAG, "onMoveToFilesActivity")
         var nextActivityIntent = Intent(view.getContext(),FilesActivity::class.java)
         nextActivityIntent.putExtra(FilesActivity.BUNDLE_KEY_MEDIA_ITEMS, mediaItems as Serializable)
         view.getContext().startActivity(nextActivityIntent)

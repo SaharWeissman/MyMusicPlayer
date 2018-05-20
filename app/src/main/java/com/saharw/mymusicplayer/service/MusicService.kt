@@ -1,9 +1,6 @@
 package com.saharw.mymusicplayer.service
 
-import android.app.Activity
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
@@ -13,10 +10,13 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
+import com.saharw.mymusicplayer.presentation.activities.files.FilesActivity
 import java.io.File
+import java.io.Serializable
 
 
 class MusicService : Service(),
@@ -34,6 +34,7 @@ class MusicService : Service(),
     lateinit var mSongsList: List<MediaItem>
     lateinit var mActivity: Activity
     private var mSongTitle: CharSequence = "Empty"
+    private val NOTIFICATION_CHANNEL_ID = "MuMusicPlayer Notification"
     private val NOTIFICATION_ID: Int = 1
 
     override fun onCreate() {
@@ -135,19 +136,8 @@ class MusicService : Service(),
             mp.start()
 
             // create pending intent (for starting activity from notification) & add notification
-            var intent = Intent(this@MusicService, mActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            var pendingIntent = PendingIntent.getActivity(this@MusicService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-            var notificationBuilder = Notification.Builder(this@MusicService)
-            notificationBuilder.setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_play)
-                .setTicker(mSongTitle)
-                .setOngoing(true)
-                .setContentTitle(mPlaying)
-                .setContentText(mSongTitle)
-            
-            startForeground(NOTIFICATION_ID, notificationBuilder.build())
+            var notification = buildNotification()
+            startForeground(NOTIFICATION_ID, notification)
 
         }else {
             Log.e(TAG, "onPrepared: player is null!")
@@ -198,6 +188,44 @@ class MusicService : Service(),
         mPlayer.setOnPreparedListener(this)
         mPlayer.setOnCompletionListener (this)
         mPlayer.setOnErrorListener(this)
+    }
+
+    private fun buildNotification(): Notification {
+        Log.d(TAG, "buildNotification")
+
+        // here we'll build all pending intent we wish to use in our notification
+        var intent = Intent(applicationContext, FilesActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK
+        intent.putExtra(FilesActivity.BUNDLE_KEY_MEDIA_ITEMS, mSongsList as Serializable)
+
+        var filesActivityPendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        // for Android O - need to create a "notification channel"
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            Log.d(TAG, "buildNotification: sdk int is Oreo or above - creating notification channel")
+            var name = getString(R.string.notification_channel_name)
+            var desc = getString(R.string.notification_channel_description)
+            var importance = NotificationManager.IMPORTANCE_DEFAULT
+            var channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance)
+            channel.description = desc
+
+            // register channel with system
+            var notifManager = getSystemService(NotificationManager::class.java)
+            notifManager.createNotificationChannel(channel)
+        }else {
+            Log.d(TAG, "buildNotification: sdk int below Oreo - no need for notification channel")
+        }
+
+        var notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(getString(R.string.notification_title))
+                .setContentText(getString(R.string.notification_content) + ": ${isPlaying()}")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(filesActivityPendingIntent)
+                .setAutoCancel(true) // automatically remove notification after user taps it
+
+        return notification.build()
+
     }
 
     // for binding to service
