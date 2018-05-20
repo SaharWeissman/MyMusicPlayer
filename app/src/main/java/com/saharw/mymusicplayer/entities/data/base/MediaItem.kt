@@ -53,4 +53,26 @@ open class MediaItem(
             return item
         }
     }
+
+    override fun toString(): String {
+        var sb = StringBuilder()
+        sb.append("mediaItem{")
+        sb.append(" id: $_id, ")
+        sb.append("artist: $artist, ")
+        sb.append("data: $dataPath, ")
+        sb.append("name: $name, ")
+        sb.append("type: $type, ")
+        sb.append("duration: $duration")
+        sb.append("sizeBytes: $sizeBytes")
+        sb.append("}")
+        return sb.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other is MediaItem && other != null){
+            return other._id == this._id
+        }else {
+            return false
+        }
+    }
 }

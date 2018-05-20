@@ -10,6 +10,7 @@ import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.adapters.MediaItemsAdapter
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
 import com.saharw.mymusicplayer.presentation.base.IView
+import io.reactivex.subjects.PublishSubject
 import java.lang.ref.WeakReference
 
 /**
@@ -25,6 +26,8 @@ class FilesView(private val activity: AppCompatActivity,
 
     private lateinit var mItemsList : ListView
     private lateinit var mItemsAdapter : MediaItemsAdapter
+
+    val mOnItemClickSubject = PublishSubject.create<MediaItem>()
 
     override fun onViewCreate() {
         Log.d(TAG, "onViewCreate")
@@ -60,7 +63,8 @@ class FilesView(private val activity: AppCompatActivity,
 
         mItemsList.onItemClickListener = AdapterView.OnItemClickListener { _, view, position, _ ->
             var viewHolder =  view?.tag as MediaItemsAdapter.ViewHolder
-            Log.d(TAG, "onItemClicked: position: $position, name: ${viewHolder.mDisplayName.text}, path: ${viewHolder.mFilePath}")
+            Log.d(TAG, "onItemClicked: position: $position, name: ${viewHolder.mDisplayName.text}, path: ${viewHolder.mMediaItem.dataPath}")
+            mOnItemClickSubject.onNext(viewHolder.mMediaItem)
         }
     }
 }

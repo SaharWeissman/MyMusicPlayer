@@ -34,7 +34,7 @@ class MediaItemsAdapter(private val ctxt : Context, private val data: List<Media
         viewHolder.mIdx.text = position.toString()
         viewHolder.mDisplayName.text = data[position].name
         viewHolder.mIcon.setImageResource(R.drawable.icons_music_file)
-        viewHolder.mFilePath = data[position].dataPath
+        viewHolder.mMediaItem = data[position]
         return convertView
     }
 
@@ -54,6 +54,6 @@ class MediaItemsAdapter(private val ctxt : Context, private val data: List<Media
         lateinit var mIdx : TextView
         lateinit var mIcon : ImageView
         lateinit var mDisplayName : TextView
-        lateinit var mFilePath : String
+        lateinit var mMediaItem: MediaItem
     }
 }

@@ -8,8 +8,10 @@ import com.saharw.mymusicplayer.presentation.activities.files.mvp.FilesView
 import com.saharw.mymusicplayer.presentation.base.IModel
 import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.base.IView
+import com.saharw.mymusicplayer.service.MusicService
 import dagger.Module
 import dagger.Provides
+import java.lang.ref.WeakReference
 import javax.inject.Singleton
 
 /**
@@ -19,7 +21,8 @@ import javax.inject.Singleton
 class FilesActivityModule(private val activity: AppCompatActivity,
                           private val mainLayoutId: Int,
                           private val itemLayoutId: Int,
-                          private val mediaItems : Collection<MediaItem>?){
+                          private val mediaItems : Collection<MediaItem>?,
+                          private val musicServWeakRef : WeakReference<MusicService>){
 
     @Provides
     @Singleton
@@ -36,6 +39,6 @@ class FilesActivityModule(private val activity: AppCompatActivity,
     @Provides
     @Singleton
     fun providePresenter(view: IView, model : IModel): IPresenter {
-        return FilesPresenter(view, model)
+        return FilesPresenter(view, model, mediaItems, musicServWeakRef)
     }
 }

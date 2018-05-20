@@ -1,14 +1,22 @@
 package com.saharw.mymusicplayer.presentation.activities.files.mvp
 
 import android.util.Log
+import com.saharw.mymusicplayer.entities.data.base.MediaItem
 import com.saharw.mymusicplayer.presentation.base.IModel
 import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.base.IView
+import com.saharw.mymusicplayer.service.MusicService
+import io.reactivex.schedulers.Schedulers
+import java.lang.ref.WeakReference
 
 /**
  * Created by saharw on 10/05/2018.
  */
-class FilesPresenter(private val view: IView, private val model: IModel) : IPresenter {
+class FilesPresenter(
+        private val view: IView,
+        private val model: IModel,
+        private val mediaItems : Collection<MediaItem>?,
+        private val serviceWeakRef : WeakReference<MusicService>) : IPresenter {
 
     private val TAG = "FilesPresenter"
 
@@ -17,9 +25,13 @@ class FilesPresenter(private val view: IView, private val model: IModel) : IPres
 
         // init view
         view.onViewCreate()
+        (view as FilesView).mOnItemClickSubject.observeOn(Schedulers.io()).subscribe { onMediaItemClicked(it) }
 
         // init model
         model.onModelCreate()
+
+        // init music service
+        initMusicService()
     }
 
     override fun onPresenterResume() {
@@ -36,5 +48,30 @@ class FilesPresenter(private val view: IView, private val model: IModel) : IPres
         Log.d(TAG, "onPresenterDestroy")
         view.onViewDestroy()
         model.onModelDestroy()
+    }
+
+    private fun initMusicService() {
+        Log.d(TAG, "initMusicService")
+        serviceWeakRef.get()?.setSongsList(mediaItems as List<MediaItem>)
+    }
+
+    private fun onMediaItemClicked(mediaItem: MediaItem?) {
+        Log.d(TAG, "onMediaItemClicked: mediaItem: $mediaItem")
+        if(mediaItem != null) {
+            var service = serviceWeakRef.get()
+            if(service != null){
+                if(service.isPlaying()){
+                    Log.d(TAG, "onMediaItemClicked: service is playing, pausing")
+                    service.pausePlayer()
+                }else {
+                    service.setSong(mediaItem)
+                    service.play()
+                }
+            }else {
+                Log.e(TAG, "onMediaItemClicked: service is null!")
+            }
+        }else {
+            Log.e(TAG, "onMediaItemClicked: item is null!")
+        }
     }
 }
