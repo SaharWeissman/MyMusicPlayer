@@ -105,6 +105,7 @@ class FilesActivity : BaseActivity() {
         if(::mPresenter.isInitialized) {
             mPresenter.onPresenterDestroy()
         }
+        stopService(mPlayIntent)
         unbindService(mMusicServiceConnection)
     }
 

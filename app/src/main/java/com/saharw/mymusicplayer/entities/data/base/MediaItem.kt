@@ -38,7 +38,7 @@ open class MediaItem(
         fun createFromCursor(cursor: Cursor): MediaItem? {
             var item :MediaItem? = null
             try {
-                var id = cursor.getLong(cursor.getColumnIndex(COLUMN_ARTIST_ID))
+                var id = cursor.getLong(cursor.getColumnIndex(COLUMN_ID))
                 var artistId = cursor.getLong(cursor.getColumnIndex(COLUMN_ARTIST_ID))
                 var artist = cursor.getString(cursor.getColumnIndex(COLUMN_ARTIST))
                 var data = cursor.getString(cursor.getColumnIndex(COLUMN_DATA))
