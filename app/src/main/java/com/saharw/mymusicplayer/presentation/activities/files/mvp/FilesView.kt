@@ -10,6 +10,7 @@ import android.widget.MediaController
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.adapters.MediaItemsAdapter
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
+import com.saharw.mymusicplayer.entities.media.MyMediaController
 import com.saharw.mymusicplayer.presentation.base.IView
 import io.reactivex.subjects.PublishSubject
 import java.lang.ref.WeakReference
@@ -76,5 +77,10 @@ class FilesView(private val activity: WeakReference<AppCompatActivity>,
     fun hideMediaController() {
         Log.d(TAG, "hideMediaController")
         activity.get()?.runOnUiThread { mediaController.get()?.hide() }
+    }
+
+    fun setSongTitle(songTitle: String) {
+        Log.d(TAG, "setSongTitle")
+        activity.get()?.runOnUiThread {(mediaController.get() as MyMediaController).setSongTitle(songTitle)}
     }
 }

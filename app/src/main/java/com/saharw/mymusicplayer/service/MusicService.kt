@@ -15,6 +15,7 @@ import android.util.Log
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
 import com.saharw.mymusicplayer.presentation.activities.files.FilesActivity
+import io.reactivex.subjects.PublishSubject
 import java.io.File
 import java.io.Serializable
 
@@ -23,8 +24,6 @@ class MusicService : Service(),
         MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener {
-
-    private val mPlaying: CharSequence = "mPlaying"
 
     private val TAG = "MusicService"
     lateinit var mPlayer : MediaPlayer
@@ -38,6 +37,8 @@ class MusicService : Service(),
     private val NOTIFICATION_ID: Int = 1
 
     private var mPlayerReleased: Boolean = false
+
+    val songNameSubject = PublishSubject.create<String>()
 
     override fun onCreate() {
         Log.d(TAG, "onCreate")
@@ -64,6 +65,7 @@ class MusicService : Service(),
         mPlayer.reset()
         try{
             val mediaItem = mSongsList[mSongIdx]
+            songNameSubject.onNext(mediaItem.name)
             mSongTitle = mediaItem.name
             mPlayer.setDataSource(applicationContext, Uri.fromFile(File(mediaItem.dataPath)))
             mPlayer.prepareAsync()

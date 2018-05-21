@@ -7,7 +7,7 @@
         android:layout_height="wrap_content">
         <TextView
             android:id="@+id/txtV_file_index"
-            android:textSize="@dimen/text_size_Medium"
+            android:textSize="@dimen/text_size_medium"
             android:text="1"
             android:textColor="@color/text_color_main"
             android:paddingLeft="4dp"
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/txtV_file_display_name"
-            android:textSize="@dimen/text_size_Medium"
+            android:textSize="@dimen/text_size_medium"
             android:text="Sample song name"
             android:layout_toRightOf="@id/txtV_file_index"
             android:paddingLeft="8dp"

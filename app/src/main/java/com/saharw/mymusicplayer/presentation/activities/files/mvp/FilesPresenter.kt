@@ -52,7 +52,9 @@ class FilesPresenter(
 
     private fun initMusicService() {
         Log.d(TAG, "initMusicService")
-        serviceWeakRef.get()?.setSongsList(mediaItems as List<MediaItem>)
+        val serviceInstance = serviceWeakRef.get()
+        serviceInstance?.setSongsList(mediaItems as List<MediaItem>)
+        serviceInstance?.songNameSubject!!.subscribeOn(Schedulers.io()).subscribe {(view as FilesView).setSongTitle(it)}
     }
 
     private fun onMediaItemClicked(mediaItem: MediaItem?) {

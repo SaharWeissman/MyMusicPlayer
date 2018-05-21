@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="text_color_main">#000000</color>
     <color name="list_view_divider_color">#000000</color>
+    <color name="text_color_media_controller">#ffffff</color>
 </resources>
