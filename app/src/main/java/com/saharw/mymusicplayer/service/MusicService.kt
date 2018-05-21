@@ -1,16 +1,17 @@
 package com.saharw.mymusicplayer.service
 
 import android.app.*
+import android.content.ComponentName
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.saharw.mymusicplayer.R
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
@@ -40,10 +41,37 @@ class MusicService : Service(),
 
     val songNameSubject = PublishSubject.create<String>()
 
+    val onPreparedSubject = PublishSubject.create<Boolean>()
+
+    // media session
+    private lateinit var mMediaSession: MediaSession
+    private val ACTION_TOGGLE_PLAYBACK = "com.saharw.mymusicplayer.service.TOGGLE_PLAYBACK"
+    private val ACTION_TOGGLE_PLAYBACK_VALUE = 1
+    private val ACTION_PREV = "com.saharw.mymusicplayer.service.PREV"
+    private val ACTION_PREV_VALUE = 3
+    private val ACTION_NEXT = "com.saharw.mymusicplayer.service.NEXT"
+    private val ACTION_NEXT_VALUE = 2
+
+    // notifications
+    private lateinit var mNotificationBuilder: Notification.Builder
+    private lateinit var mNotifActionWhenPaused : Array<Notification.Action>
+
+    private lateinit var mNotifActionWhenPlaying : Array<Notification.Action>
+
     override fun onCreate() {
         Log.d(TAG, "onCreate")
         super.onCreate()
         initMusicPlayer()
+
+        mNotifActionWhenPaused = arrayOf(
+                buildAction(R.drawable.ic_prev, getString(R.string.notification_action_prev), retreivePlaybackAction(ACTION_PREV_VALUE)!!),
+                buildAction(R.drawable.ic_play, getString(R.string.notification_action_pause), retreivePlaybackAction(ACTION_TOGGLE_PLAYBACK_VALUE)!!),
+                buildAction(R.drawable.ic_next, getString(R.string.notification_action_next), retreivePlaybackAction(ACTION_NEXT_VALUE)!!))
+
+        mNotifActionWhenPlaying = arrayOf(
+                buildAction(R.drawable.ic_prev, getString(R.string.notification_action_prev), retreivePlaybackAction(ACTION_PREV_VALUE)!!),
+                buildAction(R.drawable.ic_pause, getString(R.string.notification_action_pause), retreivePlaybackAction(ACTION_TOGGLE_PLAYBACK_VALUE)!!),
+                buildAction(R.drawable.ic_next, getString(R.string.notification_action_next), retreivePlaybackAction(ACTION_NEXT_VALUE)!!))
     }
 
     override fun onBind(intent: Intent?): IBinder {
@@ -57,6 +85,39 @@ class MusicService : Service(),
         mPlayer.release()
         mPlayerReleased = true
         return false
+    }
+
+    /**
+     * we also wish to allow starting the service with start command - to enable interacting with service
+     * from notification
+     */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand: startId = $startId")
+        if(intent != null){
+            var action = intent.action
+            when(action){
+                ACTION_NEXT -> {
+                    Log.d(TAG, "case \"ACTION_NEXT\"")
+                    playNext()
+                }
+                ACTION_PREV -> {
+                    Log.d(TAG, "case \"ACTION_PREV\"")
+                    playPrevious()
+                }
+                ACTION_TOGGLE_PLAYBACK -> {
+                    Log.d(TAG, "case \"ACTION_TOGGLE_PLAYBACK\"")
+                    if(isPlaying()){
+                        pausePlayer()
+                    }else {
+                        play()
+                    }
+                }
+                else -> {
+
+                }
+            }
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     // methods for music service
@@ -125,6 +186,8 @@ class MusicService : Service(),
     fun pausePlayer() {
         Log.d(TAG, "pausePlayer")
         mPlayer.pause()
+        var notification = buildNotification(mSongsList[mSongIdx])
+        startForeground(NOTIFICATION_ID, notification)
     }
 
 
@@ -144,10 +207,12 @@ class MusicService : Service(),
         if(mp != null) {
             mp.start()
 
-            // create pending intent (for starting activity from notification) & add notification
-            var notification = buildNotification()
-            startForeground(NOTIFICATION_ID, notification)
+            // call subject (for listeners to update for ex. the UI of media controller)
+            onPreparedSubject.onNext(true)
 
+            // create pending intent (for starting activity from notification) & add notification
+            var notification = buildNotification(mSongsList[mSongIdx])
+            startForeground(NOTIFICATION_ID, notification)
         }else {
             Log.e(TAG, "onPrepared: player is null!")
         }
@@ -199,42 +264,143 @@ class MusicService : Service(),
         mPlayer.setOnErrorListener(this)
     }
 
-    private fun buildNotification(): Notification {
+    private fun buildNotification(mediaItem: MediaItem): Notification {
         Log.d(TAG, "buildNotification")
 
         // here we'll build all pending intent we wish to use in our notification
-        var intent = Intent(applicationContext, FilesActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK
-        intent.putExtra(FilesActivity.BUNDLE_KEY_MEDIA_ITEMS, mSongsList as Serializable)
+        mActivity.runOnUiThread {
+            var intent = Intent(applicationContext, FilesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.putExtra(FilesActivity.BUNDLE_KEY_MEDIA_ITEMS, mSongsList as Serializable)
 
-        var filesActivityPendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            var filesActivityPendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        // for Android O - need to create a "notification channel"
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            Log.d(TAG, "buildNotification: sdk int is Oreo or above - creating notification channel")
-            var name = getString(R.string.notification_channel_name)
-            var desc = getString(R.string.notification_channel_description)
-            var importance = NotificationManager.IMPORTANCE_DEFAULT
-            var channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance)
-            channel.description = desc
+            // create media session
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mMediaSession = MediaSession(applicationContext, TAG)
 
-            // register channel with system
-            var notifManager = getSystemService(NotificationManager::class.java)
-            notifManager.createNotificationChannel(channel)
-        }else {
-            Log.d(TAG, "buildNotification: sdk int below Oreo - no need for notification channel")
+                // set metadata (i.e. album artwork, artist name etc.)
+
+                mMediaSession.isActive = true
+                mMediaSession.setCallback(object : MediaSession.Callback() {
+                    override fun onPlay() {
+                        super.onPlay()
+                    }
+
+                    override fun onPause() {
+                        super.onPause()
+                    }
+
+                    override fun onSkipToNext() {
+                        super.onSkipToNext()
+                    }
+
+                    override fun onSkipToPrevious() {
+                        super.onSkipToPrevious()
+                    }
+
+                    override fun onFastForward() {
+                        super.onFastForward()
+                    }
+
+                    override fun onRewind() {
+                        super.onRewind()
+                    }
+
+                    override fun onStop() {
+                        super.onStop()
+                    }
+
+                    override fun onSeekTo(pos: Long) {
+                        super.onSeekTo(pos)
+                    }
+                })
+            }
+
+            // for Android O - need to create a "notification channel"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Log.d(TAG, "buildNotification: sdk int is Oreo or above - creating notification channel")
+                var name = getString(R.string.notification_channel_name)
+                var desc = getString(R.string.notification_channel_description)
+                var importance = NotificationManager.IMPORTANCE_DEFAULT
+                var channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance)
+                channel.description = desc
+
+                // register channel with system
+                var notifManager = getSystemService(NotificationManager::class.java)
+                notifManager.createNotificationChannel(channel)
+            } else {
+                Log.d(TAG, "buildNotification: sdk int below Oreo - no need for notification channel")
+            }
+
+            mNotificationBuilder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    .setShowWhen(false) // Hide the timestamp
+                    .setStyle(Notification.MediaStyle() // Set the Notification style
+                            .setMediaSession(mMediaSession.sessionToken) // Attach our MediaSession token
+                            .setShowActionsInCompactView(0, 1, 2))// Show our playback controls in the compat view
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setColor(R.color.notification_background_color)
+                    .setContentTitle(mediaItem.artist)
+                    .setContentText(mediaItem.name)
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setContentIntent(filesActivityPendingIntent)
+                    .setAutoCancel(true) // automatically remove notification after user taps it
+
+            if (isPlaying()) {
+                mNotificationBuilder.setActions(*mNotifActionWhenPlaying)
+            } else {
+                mNotificationBuilder.setActions(*mNotifActionWhenPaused)
+            }
         }
+        return mNotificationBuilder.build()
+    }
 
-        var notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(getString(R.string.notification_title))
-                .setContentText(getString(R.string.notification_content) + ": ${isPlaying()}")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(filesActivityPendingIntent)
-                .setAutoCancel(true) // automatically remove notification after user taps it
+    private fun retreivePlaybackAction(which: Int): PendingIntent? {
+        val action: Intent
+        val pendingIntent: PendingIntent
+        val serviceName = ComponentName(this, MusicService::class.java!!)
+        when (which) {
+            ACTION_TOGGLE_PLAYBACK_VALUE -> {
+                // Play and pause
+                action = Intent(ACTION_TOGGLE_PLAYBACK)
+                action.component = serviceName
+                pendingIntent = PendingIntent.getService(this, ACTION_TOGGLE_PLAYBACK_VALUE, action, 0)
+                return pendingIntent
+            }
+            ACTION_NEXT_VALUE -> {
+                // Skip tracks
+                action = Intent(ACTION_NEXT)
+                action.component = serviceName
+                pendingIntent = PendingIntent.getService(this, ACTION_NEXT_VALUE, action, 0)
+                return pendingIntent
+            }
+            ACTION_PREV_VALUE -> {
+                // Previous tracks
+                action = Intent(ACTION_PREV)
+                action.component = serviceName
+                pendingIntent = PendingIntent.getService(this, ACTION_PREV_VALUE, action, 0)
+                return pendingIntent
+            }
+            else -> {
+            }
+        }
+        return null
+    }
 
-        return notification.build()
+    private fun buildAction(icon: Int, title : CharSequence, intent : PendingIntent) : Notification.Action {
+        Log.d(TAG, "buildAction")
+        return Notification.Action.Builder(icon, title, intent).build()
+    }
 
+    private fun notificationAlreadyExist(): Boolean {
+        Log.d(TAG, "notificationAlreadyExist")
+        var notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.activeNotifications.forEach { notification ->
+            if(notification.id == NOTIFICATION_ID){
+                return true
+            }
+        }
+        return false
     }
 
     // for binding to service

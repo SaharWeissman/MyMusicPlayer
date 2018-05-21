@@ -7,6 +7,7 @@ import com.saharw.mymusicplayer.presentation.base.IPresenter
 import com.saharw.mymusicplayer.presentation.base.IView
 import com.saharw.mymusicplayer.service.MusicService
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import java.lang.ref.WeakReference
 
 /**
@@ -16,7 +17,8 @@ class FilesPresenter(
         private val view: IView,
         private val model: IModel,
         private val mediaItems : Collection<MediaItem>?,
-        private val serviceWeakRef : WeakReference<MusicService>) : IPresenter {
+        private val serviceWeakRef : WeakReference<MusicService>,
+        private val onMediaPlayerPreparedSubject: PublishSubject<Boolean>) : IPresenter {
 
     private val TAG = "FilesPresenter"
 
@@ -26,6 +28,7 @@ class FilesPresenter(
         // init view
         view.onViewCreate()
         (view as FilesView).mOnItemClickSubject.observeOn(Schedulers.io()).subscribe { onMediaItemClicked(it) }
+        onMediaPlayerPreparedSubject.observeOn(Schedulers.single()).subscribe { view.showMediaController() }
 
         // init model
         model.onModelCreate()

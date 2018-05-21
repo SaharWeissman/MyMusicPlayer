@@ -12,6 +12,7 @@ import com.saharw.mymusicplayer.presentation.base.IView
 import com.saharw.mymusicplayer.service.MusicService
 import dagger.Module
 import dagger.Provides
+import io.reactivex.subjects.PublishSubject
 import java.lang.ref.WeakReference
 import javax.inject.Singleton
 
@@ -24,7 +25,8 @@ class FilesActivityModule(private val activity: WeakReference<AppCompatActivity>
                           private val itemLayoutId: Int,
                           private val mediaItems : Collection<MediaItem>?,
                           private val musicServWeakRef : WeakReference<MusicService>,
-                          private val mediaController : WeakReference<MediaController>){
+                          private val mediaController : WeakReference<MediaController>,
+                          private val onMediaPlayerPrepared : PublishSubject<Boolean>){
 
     @Provides
     @Singleton
@@ -41,6 +43,6 @@ class FilesActivityModule(private val activity: WeakReference<AppCompatActivity>
     @Provides
     @Singleton
     fun providePresenter(view: IView, model : IModel): IPresenter {
-        return FilesPresenter(view, model, mediaItems, musicServWeakRef)
+        return FilesPresenter(view, model, mediaItems, musicServWeakRef, onMediaPlayerPrepared)
     }
 }

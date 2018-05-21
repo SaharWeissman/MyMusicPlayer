@@ -10,4 +10,7 @@
     <string name="notification_channel_description">MyMusicPlayer notification channel description</string>
     <string name="notification_title">My music player</string>
     <string name="notification_content">Is playing</string>
+    <string name="notification_action_prev">previous</string>
+    <string name="notification_action_pause">pause</string>
+    <string name="notification_action_next">next</string>
 </resources>

@@ -74,7 +74,8 @@ class FilesActivity : BaseActivity(), MediaController.MediaPlayerControl{
                     R.layout.file_item,
                     mMediaItems,
                     WeakReference(mMusicSrvc),
-                    WeakReference(mMediaController))).build().inject(this@FilesActivity)
+                    WeakReference(mMediaController),
+                    mMusicSrvc.onPreparedSubject)).build().inject(this@FilesActivity)
             mPresenter.onPresenterCreate()
 
             // setup media player controller
@@ -127,7 +128,6 @@ class FilesActivity : BaseActivity(), MediaController.MediaPlayerControl{
     override fun onStop() {
         Log.d(TAG, "onStop")
         mMediaController.hide()
-        mMusicSrvc.pausePlayer()
         super.onStop()
     }
 
@@ -137,6 +137,7 @@ class FilesActivity : BaseActivity(), MediaController.MediaPlayerControl{
         if(::mPresenter.isInitialized) {
             mPresenter.onPresenterDestroy()
         }
+        mMusicSrvc.pausePlayer()
         stopService(mPlayIntent)
         unbindService(mMusicServiceConnection)
     }
