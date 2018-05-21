@@ -57,6 +57,7 @@ class FilesPresenter(
 
     private fun onMediaItemClicked(mediaItem: MediaItem?) {
         Log.d(TAG, "onMediaItemClicked: mediaItem: $mediaItem")
+        (view as FilesView).showMediaController()
         if(mediaItem != null) {
             var service = serviceWeakRef.get()
             if(service != null){

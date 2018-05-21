@@ -37,6 +37,8 @@ class MusicService : Service(),
     private val NOTIFICATION_CHANNEL_ID = "MuMusicPlayer Notification"
     private val NOTIFICATION_ID: Int = 1
 
+    private var mPlayerReleased: Boolean = false
+
     override fun onCreate() {
         Log.d(TAG, "onCreate")
         super.onCreate()
@@ -52,6 +54,7 @@ class MusicService : Service(),
         Log.d(TAG, "onUnbind")
         mPlayer.stop()
         mPlayer.release()
+        mPlayerReleased = true
         return false
     }
 
@@ -110,7 +113,11 @@ class MusicService : Service(),
 
     fun isPlaying(): Boolean {
         Log.d(TAG, "isPlaying")
-        return mPlayer.isPlaying
+        return if(!mPlayerReleased) {
+            mPlayer.isPlaying
+        }else {
+            false
+        }
     }
 
     fun pausePlayer() {
