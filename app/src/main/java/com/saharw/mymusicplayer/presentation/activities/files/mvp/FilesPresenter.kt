@@ -16,9 +16,8 @@ import java.lang.ref.WeakReference
 class FilesPresenter(
         private val view: IView,
         private val model: IModel,
-        private val mediaItems : Collection<MediaItem>?,
-        private val serviceWeakRef : WeakReference<MusicService>,
-        private val onMediaPlayerPreparedSubject: PublishSubject<Boolean>) : IPresenter {
+        private val onMediaPlayerPreparedSubject: PublishSubject<Boolean>,
+        private val musicServWeakRef: WeakReference<MusicService>) : IPresenter {
 
     private val TAG = "FilesPresenter"
 
@@ -27,14 +26,14 @@ class FilesPresenter(
 
         // init view
         view.onViewCreate()
-        (view as FilesView).mOnItemClickSubject.observeOn(Schedulers.io()).subscribe { onMediaItemClicked(it) }
+        (view as FilesView).mOnItemClickSubject.observeOn(Schedulers.single()).subscribe { onMediaItemClicked(it) }
         onMediaPlayerPreparedSubject.observeOn(Schedulers.single()).subscribe { view.showMediaController() }
 
         // init model
         model.onModelCreate()
 
-        // init music service
-        initMusicService()
+        // register for updating song title
+        musicServWeakRef.get()?.songNameSubject!!.subscribeOn(Schedulers.single()).subscribe {view.setSongTitle(it)}
     }
 
     override fun onPresenterResume() {
@@ -53,31 +52,13 @@ class FilesPresenter(
         model.onModelDestroy()
     }
 
-    private fun initMusicService() {
-        Log.d(TAG, "initMusicService")
-        val serviceInstance = serviceWeakRef.get()
-        serviceInstance?.setSongsList(mediaItems as List<MediaItem>)
-        serviceInstance?.songNameSubject!!.subscribeOn(Schedulers.io()).subscribe {(view as FilesView).setSongTitle(it)}
-    }
-
     private fun onMediaItemClicked(mediaItem: MediaItem?) {
         Log.d(TAG, "onMediaItemClicked: mediaItem: $mediaItem")
-        (view as FilesView).showMediaController()
         if(mediaItem != null) {
-            var service = serviceWeakRef.get()
-            if(service != null){
-                if(service.isPlaying()){
-                    Log.d(TAG, "onMediaItemClicked: service is playing, pausing")
-                    service.pausePlayer()
-                }else {
-                    service.setSong(mediaItem)
-                    service.play()
-                }
-            }else {
-                Log.e(TAG, "onMediaItemClicked: service is null!")
-            }
+            (view as FilesView).showMediaController()
+            (model as FilesModel).toggleMusicService(mediaItem)
         }else {
-            Log.e(TAG, "onMediaItemClicked: item is null!")
+            Log.e(TAG, "onMediaItemClicked: mediaItem is null!")
         }
     }
 }

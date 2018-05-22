@@ -145,6 +145,10 @@ class MusicService : Service(),
         mSongIdx = mSongsList.indexOf(mediaItem)
     }
 
+    fun getCurrSong() : MediaItem {
+        return mSongsList[mSongIdx]
+    }
+
     fun playPrevious() {
         Log.d(TAG, "playPrevious")
         mSongIdx--
@@ -186,6 +190,7 @@ class MusicService : Service(),
     fun pausePlayer() {
         Log.d(TAG, "pausePlayer")
         mPlayer.pause()
+        onPreparedSubject.onNext(true)
         var notification = buildNotification(mSongsList[mSongIdx])
         startForeground(NOTIFICATION_ID, notification)
     }
@@ -199,6 +204,9 @@ class MusicService : Service(),
     fun start() {
         Log.d(TAG, "start")
         mPlayer.start()
+
+        var notification = buildNotification(mSongsList[mSongIdx])
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     // Media player callbacks
@@ -282,74 +290,42 @@ class MusicService : Service(),
                 // set metadata (i.e. album artwork, artist name etc.)
 
                 mMediaSession.isActive = true
-                mMediaSession.setCallback(object : MediaSession.Callback() {
-                    override fun onPlay() {
-                        super.onPlay()
-                    }
+                mMediaSession.setCallback(MyMediaSession())
 
-                    override fun onPause() {
-                        super.onPause()
-                    }
+                // for Android O - need to create a "notification channel"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Log.d(TAG, "buildNotification: sdk int is Oreo or above - creating notification channel")
+                    var name = getString(R.string.notification_channel_name)
+                    var desc = getString(R.string.notification_channel_description)
+                    var importance = NotificationManager.IMPORTANCE_DEFAULT
+                    var channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance)
+                    channel.description = desc
 
-                    override fun onSkipToNext() {
-                        super.onSkipToNext()
-                    }
+                    // register channel with system
+                    var notifManager = getSystemService(NotificationManager::class.java)
+                    notifManager.createNotificationChannel(channel)
+                } else {
+                    Log.d(TAG, "buildNotification: sdk int below Oreo - no need for notification channel")
+                }
 
-                    override fun onSkipToPrevious() {
-                        super.onSkipToPrevious()
-                    }
+                mNotificationBuilder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+                        .setShowWhen(false) // Hide the timestamp
+                        .setStyle(Notification.MediaStyle() // Set the Notification style
+                                .setMediaSession(mMediaSession.sessionToken) // Attach our MediaSession token
+                                .setShowActionsInCompactView(0, 1, 2))// Show our playback controls in the compat view
+                        .setSmallIcon(R.drawable.ic_notification)
+                        .setColor(R.color.notification_background_color)
+                        .setContentTitle(mediaItem.artist)
+                        .setContentText(mediaItem.name)
+                        .setPriority(Notification.PRIORITY_DEFAULT)
+                        .setContentIntent(filesActivityPendingIntent)
+                        .setAutoCancel(true) // automatically remove notification after user taps it
 
-                    override fun onFastForward() {
-                        super.onFastForward()
-                    }
-
-                    override fun onRewind() {
-                        super.onRewind()
-                    }
-
-                    override fun onStop() {
-                        super.onStop()
-                    }
-
-                    override fun onSeekTo(pos: Long) {
-                        super.onSeekTo(pos)
-                    }
-                })
-            }
-
-            // for Android O - need to create a "notification channel"
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d(TAG, "buildNotification: sdk int is Oreo or above - creating notification channel")
-                var name = getString(R.string.notification_channel_name)
-                var desc = getString(R.string.notification_channel_description)
-                var importance = NotificationManager.IMPORTANCE_DEFAULT
-                var channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance)
-                channel.description = desc
-
-                // register channel with system
-                var notifManager = getSystemService(NotificationManager::class.java)
-                notifManager.createNotificationChannel(channel)
-            } else {
-                Log.d(TAG, "buildNotification: sdk int below Oreo - no need for notification channel")
-            }
-
-            mNotificationBuilder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-                    .setShowWhen(false) // Hide the timestamp
-                    .setStyle(Notification.MediaStyle() // Set the Notification style
-                            .setMediaSession(mMediaSession.sessionToken) // Attach our MediaSession token
-                            .setShowActionsInCompactView(0, 1, 2))// Show our playback controls in the compat view
-                    .setSmallIcon(R.drawable.ic_notification)
-                    .setColor(R.color.notification_background_color)
-                    .setContentTitle(mediaItem.artist)
-                    .setContentText(mediaItem.name)
-                    .setPriority(Notification.PRIORITY_DEFAULT)
-                    .setContentIntent(filesActivityPendingIntent)
-                    .setAutoCancel(true) // automatically remove notification after user taps it
-
-            if (isPlaying()) {
-                mNotificationBuilder.setActions(*mNotifActionWhenPlaying)
-            } else {
-                mNotificationBuilder.setActions(*mNotifActionWhenPaused)
+                if (isPlaying()) {
+                    mNotificationBuilder.setActions(*mNotifActionWhenPlaying)
+                } else {
+                    mNotificationBuilder.setActions(*mNotifActionWhenPaused)
+                }
             }
         }
         return mNotificationBuilder.build()
@@ -392,23 +368,56 @@ class MusicService : Service(),
         return Notification.Action.Builder(icon, title, intent).build()
     }
 
-    private fun notificationAlreadyExist(): Boolean {
-        Log.d(TAG, "notificationAlreadyExist")
-        var notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.activeNotifications.forEach { notification ->
-            if(notification.id == NOTIFICATION_ID){
-                return true
-            }
-        }
-        return false
-    }
-
     // for binding to service
     inner class MusicBinder : Binder() {
         fun getService(activity: Activity) : MusicService {
             Log.d(TAG, "getService")
             this@MusicService.mActivity = activity
             return this@MusicService
+        }
+    }
+
+    // for media sessions
+    inner class MyMediaSession : MediaSession.Callback() {
+        private val TAG = "MyMediaSession"
+        override fun onPlay() {
+            Log.d(TAG, "onPlay")
+            super.onPlay()
+        }
+
+        override fun onPause() {
+            Log.d(TAG, "onPause")
+            super.onPause()
+        }
+
+        override fun onSkipToNext() {
+            Log.d(TAG, "onSkipToNext")
+            super.onSkipToNext()
+        }
+
+        override fun onSkipToPrevious() {
+            Log.d(TAG, "onSkipToPrevious")
+            super.onSkipToPrevious()
+        }
+
+        override fun onFastForward() {
+            Log.d(TAG, "onFastForward")
+            super.onFastForward()
+        }
+
+        override fun onRewind() {
+            Log.d(TAG, "onRewind")
+            super.onRewind()
+        }
+
+        override fun onStop() {
+            Log.d(TAG, "onStop")
+            super.onStop()
+        }
+
+        override fun onSeekTo(pos: Long) {
+            Log.d(TAG, "onSeekTo: pos = $pos")
+            super.onSeekTo(pos)
         }
     }
 }

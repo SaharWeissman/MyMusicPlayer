@@ -37,12 +37,12 @@ class FilesActivityModule(private val activity: WeakReference<AppCompatActivity>
     @Provides
     @Singleton
     fun provideModel(): IModel {
-        return FilesModel()
+        return FilesModel(musicServWeakRef, mediaItems)
     }
 
     @Provides
     @Singleton
     fun providePresenter(view: IView, model : IModel): IPresenter {
-        return FilesPresenter(view, model, mediaItems, musicServWeakRef, onMediaPlayerPrepared)
+        return FilesPresenter(view, model, onMediaPlayerPrepared, musicServWeakRef)
     }
 }
