@@ -4,8 +4,8 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import com.saharw.mymusicplayer.R
-import com.saharw.mymusicplayer.entities.adapters.ArtistsAdapter
-import com.saharw.mymusicplayer.entities.data.ArtistsItem
+import com.saharw.mymusicplayer.entities.adapters.MyGridViewAdapter
+import com.saharw.mymusicplayer.entities.data.ComplexMediaItem
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
 import com.saharw.mymusicplayer.presentation.activities.files.FilesActivity
 import com.saharw.mymusicplayer.presentation.base.IModel
@@ -47,12 +47,12 @@ class ArtistsPresenter(private val view: IView,
         view.onViewDestroy()
     }
 
-    private fun onArtistsDataReady(data: Collection<ArtistsItem>?) {
-        Log.d(TAG, "onArtistsDataReady: dataPath = $data")
+    private fun onArtistsDataReady(data: Collection<ComplexMediaItem>?) {
+        Log.d(TAG, "onArtistsDataReady: data = $data")
         if(data != null){
-            (view as ArtistsView).displayArtistsData(data as List<ArtistsItem>, R.layout.artist_item, this)
+            (view as ArtistsView).displayArtistsData(data as List<ComplexMediaItem>, R.layout.complex_media_item, this)
         }else {
-            Log.e(TAG, "onArtistsDataReady: no dataPath exists!")
+            Log.e(TAG, "onArtistsDataReady: no data exists!")
         }
     }
 
@@ -60,7 +60,7 @@ class ArtistsPresenter(private val view: IView,
         Log.d(TAG, "onClick: v = $v")
 
         // extract items from view's tag
-        var viewHolder = v?.tag as ArtistsAdapter.ViewHolder
+        var viewHolder = v?.tag as MyGridViewAdapter.ViewHolder
         var mediaItems = viewHolder.mMediaItems
         if(mediaItems != null && mediaItems.isNotEmpty()){
             Log.d(TAG, "onClick: artist \"${viewHolder.mName}\" has ${mediaItems.size} media items, sending to files fragment")

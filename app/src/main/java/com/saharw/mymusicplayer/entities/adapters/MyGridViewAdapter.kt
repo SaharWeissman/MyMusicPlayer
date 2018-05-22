@@ -9,17 +9,17 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.saharw.mymusicplayer.R
-import com.saharw.mymusicplayer.entities.data.ArtistsItem
+import com.saharw.mymusicplayer.entities.data.ComplexMediaItem
 import com.saharw.mymusicplayer.entities.data.base.MediaItem
 
 /**
  * Created by saharw on 09/05/2018.
  */
-class ArtistsAdapter(private val ctxt: Context, private val data: List<ArtistsItem>, private val layoutId: Int, private val onClickListener: View.OnClickListener) : BaseAdapter() {
+class MyGridViewAdapter(private val ctxt: Context, private val data: List<ComplexMediaItem>, private val layoutId: Int, private val onClickListener: View.OnClickListener) : BaseAdapter() {
 
-    private val TAG = "ArtistsAdapter"
+    private val TAG = "MyGridViewAdapter"
 
-    override fun getItem(position: Int): ArtistsItem {
+    override fun getItem(position: Int): ComplexMediaItem {
         Log.d(TAG, "getItem: position = $position")
         return data[position]
     }

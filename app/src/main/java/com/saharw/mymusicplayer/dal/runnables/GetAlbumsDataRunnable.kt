@@ -13,7 +13,7 @@ import com.saharw.mymusicplayer.entities.data.base.*
  * Created by saharw on 09/05/2018.
  */
 
-class GetArtistsDataRunnable(contentResolver: ContentResolver) :
+class GetAlbumsDataRunnable(contentResolver: ContentResolver) :
         GetDataRunnableBase(contentResolver, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 DataQuery(
                         arrayOf(COLUMN_ID, COLUMN_DATA, COLUMN_TITLE, COLUMN_DISPLAY_NAME, COLUMN_DURATION, COLUMN_ALBUM, COLUMN_ALBUM_ID, COLUMN_ARTIST, COLUMN_ARTIST_ID, COLUMN_IS_MUSIC, COLUMN_SIZE),
@@ -22,11 +22,11 @@ class GetArtistsDataRunnable(contentResolver: ContentResolver) :
                         null
                         )) {
 
-    private val TAG = "GetArtistsDataRunnable"
+    private val TAG = "GetAlbumsDataRunnable"
 
     override fun extractFromCursor(cursor: Cursor) {
         Log.d(TAG, "extractFromCursor: cursor.count = ${cursor.count}")
-        var artistsDataMap = mutableMapOf<Pair<Long, String>, MutableList<MediaItem>>()
+        var albumsDataMap = mutableMapOf<Pair<Long, String>, MutableList<MediaItem>>()
         if(cursor.moveToFirst()){
             while(!cursor.isAfterLast){
 
@@ -36,12 +36,12 @@ class GetArtistsDataRunnable(contentResolver: ContentResolver) :
                  */
                 var mediaItem = MediaItem.createFromCursor(cursor)
                 if(mediaItem != null) {
-                    var artistsItems = artistsDataMap[Pair(mediaItem.artistId, mediaItem.artist)]
-                    if (artistsItems == null){
-                        artistsItems = mutableListOf()
+                    var albumItems = albumsDataMap[Pair(mediaItem.albumId, mediaItem.album)]
+                    if (albumItems == null){
+                        albumItems = mutableListOf()
                     }
-                    artistsItems!!.add(mediaItem)
-                    artistsDataMap[Pair(mediaItem.artistId,mediaItem.artist)] = artistsItems
+                    albumItems!!.add(mediaItem)
+                    albumsDataMap[Pair(mediaItem.albumId,mediaItem.album)] = albumItems
                 }else {
                     Log.e(TAG, "extractFromCursor: media item created from cursor is null!")
                 }
@@ -49,13 +49,13 @@ class GetArtistsDataRunnable(contentResolver: ContentResolver) :
             }
 
             // finished populating map - convert to ComplexMediaItem (for convenience)
-            var entryIterator = artistsDataMap.entries.iterator()
-            var artistsCollection = mutableListOf<ComplexMediaItem>()
+            var entryIterator = albumsDataMap.entries.iterator()
+            var albumsCollection = mutableListOf<ComplexMediaItem>()
             while(entryIterator.hasNext()){
                 var entry = entryIterator.next()
-                artistsCollection.add(ComplexMediaItem(entry.key.first, entry.key.second, entry.value))
+                albumsCollection.add(ComplexMediaItem(entry.key.first, entry.key.second, entry.value))
             }
-            MusicDataProvider.artistsDataSubject.onNext(artistsCollection)
+            MusicDataProvider.albumsDataSubject.onNext(albumsCollection)
         }else {
             Log.i(TAG, "extractFromCursor: cursor.moveToFirst() returned false")
         }
