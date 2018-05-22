@@ -45,7 +45,9 @@ class FragmentArtists : BaseFragment() {
     override fun onResume() {
         Log.d(TAG, "onResume")
         super.onResume()
-        mPresenter.onPresenterResume()
+        if(isVisible) {
+            mPresenter.onPresenterResume()
+        }
     }
 
     override fun onPause() {
